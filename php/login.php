@@ -4,9 +4,10 @@ if (array_key_exists('login', $_REQUEST) &&
  	require 'config.phplib';
 	$conn = pg_connect("user=".$CONFIG['username'].
 	    " dbname=".$CONFIG['database']);
-	$result = pg_query("SELECT * from users
-	    WHERE login='".$_REQUEST['login']."'
-	    AND password='".$_REQUEST['password']."'");
+	//The only reliable way to prevent SQL injection is to carefully use only parameterized queries ("prepared statements") and avoid string interpolation in queries.By using pg_query_params() we prevent sql injection attack.
+	$result = pg_query_params($conn, "SELECT * from users
+	    WHERE login='$1' AND password='$2", array($_REQUEST['login'],$_REQUEST['password']));
+	
 	$row = pg_fetch_assoc($result);
 	if ($row === False) {
 		require 'header.php';
